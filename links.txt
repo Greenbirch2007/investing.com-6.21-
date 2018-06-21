@@ -1,0 +1,11 @@
+中国 ：https://cn.investing.com/stock-screener/?sp=country::37|sector::a|industry::a|equityType::a%3Ceq_market_cap;1
+
+日本：https://cn.investing.com/stock-screener/?sp=country::35|sector::a|industry::a|equityType::a%3Ceq_market_cap;1
+
+
+美国：https://cn.investing.com/stock-screener/?sp=country::5|sector::a|industry::a|equityType::a%3Ceq_market_cap;1
+
+
+香港：https://cn.investing.com/stock-screener/?sp=country::39|sector::a|industry::a|equityType::a%3Ceq_market_cap;1
+
+
