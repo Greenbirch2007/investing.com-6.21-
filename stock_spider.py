@@ -1,44 +1,70 @@
 #! -*- coding:utf-8 -*-
 
 
-import requests
 import re
 from selenium import webdriver
+from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as E
-
-
-
-# 网页有js渲染，selenium出动
-def get_one_html(url):
-    driver = webdriver.Chrome()
-    driver.get(url)
-    headers = {
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
-        'Accept-Encoding': 'gzip, deflate, br',
-        'Accept-Language': 'zh-CN,zh;q=0.9',
-        'Connection': 'keep-alive',
-        'Cookie': 'PHPSESSID=4hu00ltjtja67ou5rk52vcsap6; geoC=CN; adBlockerNewUserDomains=1529582697; StickySession=id.14211634542.498.cn.investing.com; _ga=GA1.2.1542595398.1529582706; _gid=GA1.2.1563365873.1529582708; Hm_lvt_a1e3d50107c2a0e021d734fe76f85914=1529582708; __gads=ID=3bbccfb89689b3c5:T=1529582707:S=ALNI_MZRIyxz0CMhn04-wHc7oADDtRRhGQ; billboardCounter_6=0; nyxDorf=OT1kNWU3YyEwbjw5ZCk3PDRkP3owMjA2; Hm_lpvt_a1e3d50107c2a0e021d734fe76f85914=1529593201; _gat_allSitesTracker=1; _gat=1',
-        'Host': 'cn.investing.com',
-        'Referer': 'https://cn.investing.com/equities/',
-        'Upgrade-Insecure-Requests': '1',
-        'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.132 Safari/537.36'
-    }
+from selenium.webdriver.support import expected_conditions as EC
+import requests
+import urllib.request
+import time
+from multiprocessing import Pool
+proxies = { "https": "https://1.199.194.227"}
+# full_url = "http://www.mzitu.com/xinggan/"
+headers = {'User-Agent':'Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 5.1; Trident/4.0; GTB7.0'}
+def get_one_page(url):
     try:
-        response = requests.get(url,headers=headers)
-        if response.status_code ==200:
-            print(response.text)
+        response = requests.get(url,proxies=proxies,headers=headers)
+        if response.status_code == 200:
+            return response.text
         else:
-            print(response.status_code)
-    except RequestException:
-        None
+            get_one_page()
+    except HTTPError :
+        pass
 
-    print(response.status_code)
-# 要用selenium等待页面完全加载！
+str_list = []
 
-url = 'https://cn.investing.com/stock-screener/?sp=country::39|sector::a|industry::a|equityType::a%3Ceq_market_cap;1'
+driver = webdriver.Chrome()
+wait = WebDriverWait(driver, 10)
 
 
-get_one_html(url)
+def start_page():
 
+    try:
+        driver.get('https://cn.investing.com/stock-screener/?sp=country::37|sector::a|industry::a|equityType::a%3Ceq_market_cap;1')
+        # time.sleep(6)
+        # get_info()
+
+    except TimeoutException:
+        return start_page()
+#还是要掌握js的写法！
+
+# <a href="javascript:void(0);" " title=" 显示结果 51 到 100 / 3631" class="pagination" boundblank="">2</a>
+
+
+# 翻页的类型也很多，有一般的，变换距离的，要执行js的
+def next_page():
+    try:
+        submit = wait.until(
+            EC.element_to_be_clickable((By.XPATH,'//*[@id="paginationWrap"]/div[3]/a')))
+        submit.click()
+        # get_info()
+    except TimeoutException:
+        next_page()
+
+start_page()
+next_page()
+#
+# def get_info():
+#     driver.implicitly_wait(6)
+    # wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, 'body > div.con > div > script:nth-child(2)')))
+    # html = driver.page_source
+    # patt = re.compile('data-id="(.*?)"', re.S)
+    # items = re.findall(patt, html)
+    # for ite1 in items:
+    #     str_list.append(ite1)
+    # for ite2 in iter(str_list):
+    #     url = 'http://www.sesehezi.com/video/' + ite2
+    #     big_list.append(url)
